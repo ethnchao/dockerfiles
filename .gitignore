@@ -1,0 +1,16 @@
+# 本地环境变量（含仓库密码等敏感信息，不入库）
+.env
+.env.*
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# 云效等 CI 工具产生的临时目录
+.yunxiao/cache/
+*.log

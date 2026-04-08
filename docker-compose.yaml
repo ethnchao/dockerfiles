@@ -1,0 +1,57 @@
+# docker-compose.yaml — 本地一键启动测试所有封装镜像
+# 用途：验证镜像构建结果，不用于生产部署
+#
+# 使用方式：
+#   docker compose up -d              # 后台启动所有服务
+#   docker compose up nginx           # 仅启动指定服务
+#   docker compose logs -f nginx      # 查看日志
+#   docker compose down               # 停止并删除容器
+
+name: dockerfiles-test
+
+# 通过 .env 文件或环境变量覆盖仓库地址
+# 默认从本地构建（build 优先于 image）
+x-registry: &registry
+  REGISTRY: ${REGISTRY:-registry.cn-hangzhou.aliyuncs.com/onemanstudio}
+
+services:
+
+  ubuntu:
+    build:
+      context: .
+      dockerfile: images/ubuntu/Dockerfile
+    image: ${REGISTRY:-registry.cn-hangzhou.aliyuncs.com/onemanstudio}/ubuntu:local
+    container_name: test-ubuntu
+    # 保持容器运行方便进入调试
+    stdin_open: true
+    tty: true
+    restart: "no"
+
+  nginx:
+    build:
+      context: .
+      dockerfile: images/nginx/Dockerfile
+    image: ${REGISTRY:-registry.cn-hangzhou.aliyuncs.com/onemanstudio}/nginx:local
+    container_name: test-nginx
+    ports:
+      - "18080:80"
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  node:
+    build:
+      context: .
+      dockerfile: images/node/Dockerfile
+    image: ${REGISTRY:-registry.cn-hangzhou.aliyuncs.com/onemanstudio}/node:local
+    container_name: test-node
+    stdin_open: true
+    tty: true
+    restart: "no"
+    # 挂载当前目录方便快速测试脚本
+    volumes:
+      - ./:/workspace:ro
+    working_dir: /workspace
