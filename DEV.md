@@ -99,14 +99,34 @@ docker buildx inspect --bootstrap
 
 ## CI/CD（阿里云云效）
 
-> 待接入，规划如下：
+流水线配置文件：`.yunxiao/flow.yml`，Pipeline as Code，随代码一起版本管理。
 
-- 触发条件：`main` 分支有 push 时触发
-- 构建命令：`docker buildx bake --push`
-- 仓库地址通过云效「构建变量」注入 `REGISTRY`、`TAG`（建议用 Git commit SHA）
-- 多平台构建需在云效 runner 上预先启用 `docker buildx`
+### 首次接入步骤
 
-流水线配置文件将放置于 `.yunxiao/` 目录（待创建）。
+1. **创建服务连接**：云效控制台 → 设置 → 服务连接 → 新建（Docker Registry 类型），填入阿里云 ACR 或 Harbor 的地址、用户名、密码，记下生成的连接 ID。
+2. **填写代码源**：将 `flow.yml` 中的 `<your-codeup-repository-url>` 和 `<your-service-connection-id>` 替换为真实值。
+3. **配置私密变量**：在云效流水线 → 变量和缓存 → 新建私密变量，添加：
+   - `REGISTRY_USERNAME`：镜像仓库登录用户名
+   - `REGISTRY_PASSWORD`：镜像仓库登录密码（私密）
+4. **触发方式**：push 到 `main` 分支自动触发；也可在云效页面手动运行并指定 `TAG`。
+
+### 切换目标仓库
+
+在云效流水线"变量和缓存"页面，覆盖以下变量即可无需改动 YAML：
+
+| 变量 | 阿里云默认值 | Harbor 示例 |
+|------|-------------|-------------|
+| `REGISTRY` | `registry.cn-hangzhou.aliyuncs.com/onemanstudio` | `harbor.mcdchina.net/devops-public` |
+| `REGISTRY_HOST` | `registry.cn-hangzhou.aliyuncs.com` | `harbor.mcdchina.net` |
+| `TAG` | `latest` | `20240101` 或 Git short SHA |
+
+### 流水线阶段说明
+
+| 阶段 | 说明 |
+|------|------|
+| 初始化构建环境 | 检查 Docker 版本，创建 `docker buildx` 多架构 builder |
+| 登录镜像仓库 | `docker login` 至目标仓库（凭据来自私密变量） |
+| 构建并推送镜像 | 计算 Tag（短 SHA），执行 `docker buildx bake --push` 并行构建全部镜像 |
 
 ## 注意事项
 
