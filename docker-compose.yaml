@@ -55,3 +55,13 @@ services:
     volumes:
       - ./:/workspace:ro
     working_dir: /workspace
+
+  openclaw:
+    build:
+      context: .
+      dockerfile: images/openclaw/Dockerfile
+    image: ${REGISTRY:-registry.cn-hangzhou.aliyuncs.com/onemanstudio}/openclaw:local
+    container_name: test-openclaw
+    stdin_open: true
+    tty: true
+    restart: "no"

@@ -37,7 +37,7 @@ variable "BUILD_PLATFORMS" {
 # ── 构建目标分组 ──────────────────────────────────────────────────────────────
 
 group "default" {
-  targets = ["ubuntu", "nginx", "node"]
+  targets = ["ubuntu", "nginx", "node", "openclaw"]
 }
 
 # ── 通用继承基础（私有，以 _ 开头） ──────────────────────────────────────────
@@ -76,5 +76,14 @@ target "node" {
   tags = [
     "${REGISTRY}/node:${TAG}",
     "${REGISTRY}/node:20-lts",
+  ]
+}
+
+target "openclaw" {
+  inherits   = ["_common"]
+  dockerfile = "images/openclaw/Dockerfile"
+  tags = [
+    "${REGISTRY}/openclaw:${TAG}",
+    "${REGISTRY}/openclaw:2026.3.31-slim",
   ]
 }
