@@ -97,36 +97,43 @@ docker buildx create --name mybuilder --use
 docker buildx inspect --bootstrap
 ```
 
-## CI/CD（阿里云云效）
+## CI/CD（GitHub Actions）
 
-流水线配置文件：`.yunxiao/flow.yml`，Pipeline as Code，随代码一起版本管理。
+流水线配置：`.github/workflows/build-push.yml`，随代码版本管理。
 
 ### 首次接入步骤
 
-1. **创建服务连接**：云效控制台 → 设置 → 服务连接 → 新建（Docker Registry 类型），填入阿里云 ACR 或 Harbor 的地址、用户名、密码，记下生成的连接 ID。
-2. **填写代码源**：将 `flow.yml` 中的 `<your-codeup-repository-url>` 和 `<your-service-connection-id>` 替换为真实值。
-3. **配置私密变量**：在云效流水线 → 变量和缓存 → 新建私密变量，添加：
-   - `REGISTRY_USERNAME`：镜像仓库登录用户名
-   - `REGISTRY_PASSWORD`：镜像仓库登录密码（私密）
-4. **触发方式**：push 到 `main` 分支自动触发；也可在云效页面手动运行并指定 `TAG`。
+1. **配置 Secrets**（仓库 Settings → Secrets and variables → Actions → New repository secret）：
 
-### 切换目标仓库
+   | Secret | 说明 |
+   |--------|------|
+   | `REGISTRY_USERNAME` | 镜像仓库登录用户名 |
+   | `REGISTRY_PASSWORD` | 镜像仓库登录密码 |
 
-在云效流水线"变量和缓存"页面，覆盖以下变量即可无需改动 YAML：
+2. **配置 Variables**（同页面 Variables 标签，非敏感信息）：
 
-| 变量 | 阿里云默认值 | Harbor 示例 |
-|------|-------------|-------------|
-| `REGISTRY` | `registry.cn-hangzhou.aliyuncs.com/onemanstudio` | `harbor.mcdchina.net/devops-public` |
-| `REGISTRY_HOST` | `registry.cn-hangzhou.aliyuncs.com` | `harbor.mcdchina.net` |
-| `TAG` | `latest` | `20240101` 或 Git short SHA |
+   | Variable | 默认值 | Harbor 切换示例 |
+   |----------|--------|----------------|
+   | `REGISTRY` | `registry.cn-hangzhou.aliyuncs.com/onemanstudio` | `harbor.mcdchina.net/devops-public` |
+   | `REGISTRY_HOST` | `registry.cn-hangzhou.aliyuncs.com` | `harbor.mcdchina.net` |
 
-### 流水线阶段说明
+   > Variables 留空时 workflow 文件中的默认值生效，无需强制配置。
 
-| 阶段 | 说明 |
+3. **触发方式**：
+   - push 到 `main` 分支自动触发，Tag 使用 git short SHA
+   - 在 Actions 页面手动触发（workflow_dispatch），可指定 `registry` 和 `tag`
+
+### 流水线步骤说明
+
+| 步骤 | 说明 |
 |------|------|
-| 初始化构建环境 | 检查 Docker 版本，创建 `docker buildx` 多架构 builder |
-| 登录镜像仓库 | `docker login` 至目标仓库（凭据来自私密变量） |
-| 构建并推送镜像 | 计算 Tag（短 SHA），执行 `docker buildx bake --push` 并行构建全部镜像 |
+| 检出代码 | `actions/checkout@v4` |
+| 确定 Tag | 手动指定优先，否则取 git commit SHA 前 8 位 |
+| 设置 QEMU | 支持 arm64 等跨平台模拟 |
+| 设置 buildx | `docker-container` driver，原生支持多平台 |
+| 登录仓库 | `docker/login-action@v3`，凭据来自 Secrets |
+| 构建推送 | `docker buildx bake --push`，并行构建全部镜像（amd64 + arm64）|
+| 构建摘要 | 写入 GitHub Actions Summary 页面 |
 
 ## 注意事项
 
