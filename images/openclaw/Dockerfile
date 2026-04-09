@@ -16,6 +16,4 @@ RUN --mount=type=bind,source=common,target=/tmp/common \
     sh /tmp/common/common-setup.sh
 
 # 切回原镜像默认非 root 用户
-# 验证原镜像实际用户：docker inspect ghcr.io/openclaw/openclaw:2026.3.31-slim --format '{{.Config.User}}'
-# 若结果不是 nobody，将下方改为对应用户名或 UID
-USER nobody
+USER node
