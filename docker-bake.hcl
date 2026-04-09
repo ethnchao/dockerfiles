@@ -23,8 +23,15 @@ variable "TAG" {
 }
 
 variable "BUILD_PLATFORMS" {
-  # 目标构建平台，多平台用逗号分隔
-  default = "linux/amd64,linux/arm64"
+  # 留空 = 使用当前宿主机原生平台（兼容本地默认 docker driver，无需额外 builder）
+  # 多平台构建时设置为 "linux/amd64,linux/arm64"（需要 docker-container driver，见下方说明）
+  #
+  # 本地启用多平台：
+  #   docker buildx create --name multiarch --driver docker-container --use --bootstrap
+  #   BUILD_PLATFORMS=linux/amd64,linux/arm64 docker buildx bake --push
+  #
+  # CI（云效）中流水线已自动创建 docker-container driver builder，可直接使用多平台。
+  default = ""
 }
 
 # ── 构建目标分组 ──────────────────────────────────────────────────────────────
@@ -37,8 +44,10 @@ group "default" {
 
 target "_common" {
   # 构建上下文为仓库根目录，保证 common/ 目录对所有 Dockerfile 可见
-  context   = "."
-  platforms = [BUILD_PLATFORMS]
+  context = "."
+  # BUILD_PLATFORMS 为空时不设置 platforms，bake 自动使用宿主机原生平台
+  # BUILD_PLATFORMS 非空时用 split() 正确拆分为平台列表（[VAR] 写法会把整个字符串当一个元素）
+  platforms = BUILD_PLATFORMS != "" ? split(",", BUILD_PLATFORMS) : null
 }
 
 # ── 各镜像构建目标 ────────────────────────────────────────────────────────────
