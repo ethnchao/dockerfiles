@@ -18,7 +18,19 @@ fi
 
 case "$ID" in
     ubuntu)
-        MIRROR="http://mirrors.aliyun.com/ubuntu"
+        # 阿里云 Ubuntu 镜像分两个仓库：
+        #   mirrors.aliyun.com/ubuntu       → 仅含 amd64 / i386
+        #   mirrors.aliyun.com/ubuntu-ports → arm64 / armhf / riscv64 等 ports 架构
+        ARCH=$(dpkg --print-architecture 2>/dev/null || uname -m)
+        case "$ARCH" in
+            amd64|i386)
+                MIRROR="http://mirrors.aliyun.com/ubuntu"
+                ;;
+            *)
+                MIRROR="http://mirrors.aliyun.com/ubuntu-ports"
+                ;;
+        esac
+
         cat > /etc/apt/sources.list <<EOF
 deb ${MIRROR}/ ${VERSION_CODENAME} main restricted universe multiverse
 deb ${MIRROR}/ ${VERSION_CODENAME}-security main restricted universe multiverse
@@ -29,7 +41,7 @@ EOF
         if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
             rm -f /etc/apt/sources.list.d/ubuntu.sources
         fi
-        echo "[setup-apt-mirror] Ubuntu ${VERSION_CODENAME} apt 源已切换为阿里云"
+        echo "[setup-apt-mirror] Ubuntu ${VERSION_CODENAME} (${ARCH}) apt 源已切换为阿里云 → ${MIRROR}"
         ;;
     debian)
         MIRROR="http://mirrors.aliyun.com/debian"
