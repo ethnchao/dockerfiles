@@ -21,7 +21,10 @@ RUN --mount=type=bind,source=common,target=/tmp/common \
 ARG TARGETARCH
 ARG GOGCLI_VERSION=0.12.0
 
-RUN curl -fsSL \
+RUN apt-get update -qq \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL \
         "https://github.com/steipete/gogcli/releases/download/v${GOGCLI_VERSION}/gogcli_${GOGCLI_VERSION}_linux_${TARGETARCH}.tar.gz" \
         | tar -xz -C /usr/local/bin/ gogcli \
     && chmod +x /usr/local/bin/gogcli \
