@@ -26,9 +26,9 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/* \
     && curl -fsSL \
         "https://github.com/steipete/gogcli/releases/download/v${GOGCLI_VERSION}/gogcli_${GOGCLI_VERSION}_linux_${TARGETARCH}.tar.gz" \
-        | tar -xz -C /usr/local/bin/ gogcli \
-    && chmod +x /usr/local/bin/gogcli \
-    && gogcli --version
+        | tar -xz -C /usr/local/bin/ gog \
+    && chmod +x /usr/local/bin/gog \
+    && gog --version
 
 # ── 切回原镜像默认非 root 用户 ───────────────────────────────────────────────
 # 验证原镜像实际用户：docker inspect ghcr.io/openclaw/openclaw:2026.3.31-slim --format '{{.Config.User}}'
