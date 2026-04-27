@@ -9,7 +9,7 @@
 | `ubuntu` | `ubuntu:22.04` | 通用 Ubuntu 基础层，适合作为其他自定义镜像的 FROM 来源 |
 | `nginx` | `nginx:alpine` | 生产级 Nginx，内置调试工具、已配置阿里云 apk 源和 Asia/Shanghai 时区 |
 | `node` | `node:20-bullseye-slim` | Node.js 20 LTS，npm/yarn/pnpm 已切换 npmmirror，适合 CI 构建和应用运行 |
-| `openclaw` | `ghcr.io/openclaw/openclaw:2026.3.31-slim` | OpenClaw 应用镜像，已配置阿里云 apt 源、Asia/Shanghai 时区、内置调试工具 |
+| `openclaw` | `ghcr.io/openclaw/openclaw:2026.4.24-slim` | OpenClaw 应用镜像，已配置阿里云 apt 源、Asia/Shanghai 时区、内置调试工具 |
 
 ## 公共特性（通用封装）
 

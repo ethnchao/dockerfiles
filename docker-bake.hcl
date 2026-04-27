@@ -84,6 +84,6 @@ target "openclaw" {
   dockerfile = "images/openclaw/Dockerfile"
   tags = [
     "${REGISTRY}/openclaw:${TAG}",
-    "${REGISTRY}/openclaw:2026.3.31-slim",
+    "${REGISTRY}/openclaw:2026.4.24-slim",
   ]
 }
