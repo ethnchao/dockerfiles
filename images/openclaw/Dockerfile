@@ -28,8 +28,7 @@ RUN apt-get update -qq \
         "https://github.com/steipete/gogcli/releases/download/v${GOGCLI_VERSION}/gogcli_${GOGCLI_VERSION}_linux_${TARGETARCH}.tar.gz" \
         | tar -xz -C /usr/local/bin/ gog \
     && chmod +x /usr/local/bin/gog \
-    && gog --version \
-    && npx -y @larksuite/openclaw-lark install
+    && gog --version
 
 # ── 切回原镜像默认非 root 用户 ───────────────────────────────────────────────
 # 验证原镜像实际用户：docker inspect ghcr.io/openclaw/openclaw:2026.4.24-slim --format '{{.Config.User}}'
